@@ -8,9 +8,9 @@
     "5": [0.026, 0.145, 0.278, 0.425, 0.589, 0.771, 0.973, 1.196, 1.441, 1.708, 1.998, 2.312, 2.651, 3.016]
   },
   "audio": {
-    "1.5": "/sounds/fiji_1_5.mp3",
-    "2.5": "/sounds/fiji_2_5.mp3",
-    "5": "/sounds/fiji_5.mp3"
+    "1.5": "/sounds/fiji_1_5.wav",
+    "2.5": "/sounds/fiji_2_5.wav",
+    "5": "/sounds/fiji_5.wav"
   },
   "thresholds": [
     { "value": 0.5, "label": "0.5m - Coastal flooding increases" },
