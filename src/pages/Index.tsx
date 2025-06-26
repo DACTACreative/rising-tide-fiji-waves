@@ -15,7 +15,7 @@ const Index = () => {
   const [selectedScenario, setSelectedScenario] = useState('1.5');
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTimeIndex, setCurrentTimeIndex] = useState(0);
-  const [animationSpeed, setAnimationSpeed] = useState(1000); // ms per step
+  const [animationSpeed, setAnimationSpeed] = useState(1000);
 
   // Load data on mount
   useEffect(() => {
@@ -25,7 +25,7 @@ const Index = () => {
         const dataLoader = DataLoader.getInstance();
         const loadedData = await dataLoader.loadData('/data/fiji-sealevel-data.json');
         setData(loadedData);
-        toast.success(`Loaded sea level data for ${loadedData.country}`);
+        toast.success(`Data loaded for ${loadedData.country}`);
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to load data';
         setError(errorMessage);
@@ -59,7 +59,6 @@ const Index = () => {
     setSelectedScenario(scenario);
     setCurrentTimeIndex(0);
     setIsPlaying(false);
-    toast.info(`Switched to ${scenario}°C warming scenario`);
   };
 
   const handlePlayStateChange = (playing: boolean) => {
@@ -78,36 +77,28 @@ const Index = () => {
   const resetAnimation = () => {
     setCurrentTimeIndex(0);
     setIsPlaying(false);
-    toast.info('Animation reset to 2020');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-cyan-100">
-        <Card className="w-96">
-          <CardContent className="p-8 text-center">
-            <div className="animate-spin w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full mx-auto mb-4"></div>
-            <h2 className="text-lg font-semibold text-slate-700">Loading Sea Level Data</h2>
-            <p className="text-slate-500 mt-2">Preparing climate visualization...</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-slate-600 font-medium">Loading...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-red-50 to-orange-100">
-        <Card className="w-96">
-          <CardContent className="p-8 text-center">
-            <div className="text-red-500 text-4xl mb-4">⚠️</div>
-            <h2 className="text-lg font-semibold text-red-700">Data Loading Error</h2>
-            <p className="text-red-600 mt-2">{error || 'Unknown error occurred'}</p>
-            <Button 
-              onClick={() => window.location.reload()} 
-              className="mt-4"
-              variant="outline"
-            >
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-red-50">
+        <Card className="max-w-md">
+          <CardContent className="p-8 text-center space-y-4">
+            <div className="text-red-500 text-2xl">⚠️</div>
+            <h2 className="text-lg font-semibold text-red-700">Error</h2>
+            <p className="text-red-600 text-sm">{error || 'Unknown error'}</p>
+            <Button onClick={() => window.location.reload()} variant="outline" size="sm">
               Retry
             </Button>
           </CardContent>
@@ -123,41 +114,40 @@ const Index = () => {
   const audioUrl = data.audio[selectedScenario];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-cyan-50 to-teal-50">
-      {/* Header */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">
-            🌊 {data.country} Sea Level Rise
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+      <div className="container mx-auto px-6 py-12 max-w-4xl">
+        {/* Header */}
+        <div className="text-center mb-16 space-y-4">
+          <h1 className="text-3xl md:text-4xl font-light text-slate-800 tracking-tight">
+            Fiji Sea Level Rise
           </h1>
-          <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-            Interactive visualization of sea level rise scenarios from 2020 to 2150.
-            Experience the impact of different warming pathways on Pacific island nations.
+          <p className="text-slate-600 max-w-lg mx-auto leading-relaxed">
+            Visualizing climate impact through three warming scenarios
           </p>
         </div>
 
         {/* Main Content */}
-        <div className="space-y-8">
+        <div className="space-y-12">
           {/* Scenario Selection */}
-          <ScenarioSelector
-            scenarios={scenarios}
-            selectedScenario={selectedScenario}
-            onScenarioChange={handleScenarioChange}
-            disabled={isPlaying}
-          />
-
-          {/* Wave Visualization */}
           <div className="flex justify-center">
-            <WaveVisualizer
-              data={currentScenarioData}
-              years={data.years}
-              currentIndex={currentTimeIndex}
-              thresholds={data.thresholds}
-              scenario={selectedScenario}
-              isPlaying={isPlaying}
-              onProgress={(progress) => console.log('Wave progress:', progress)}
+            <ScenarioSelector
+              scenarios={scenarios}
+              selectedScenario={selectedScenario}
+              onScenarioChange={handleScenarioChange}
+              disabled={isPlaying}
             />
           </div>
+
+          {/* Wave Visualization */}
+          <WaveVisualizer
+            data={currentScenarioData}
+            years={data.years}
+            currentIndex={currentTimeIndex}
+            thresholds={data.thresholds}
+            scenario={selectedScenario}
+            isPlaying={isPlaying}
+            onProgress={(progress) => console.log('Wave progress:', progress)}
+          />
 
           {/* Audio Player */}
           <AudioPlayer
@@ -170,79 +160,30 @@ const Index = () => {
             scenario={selectedScenario}
           />
 
-          {/* Control Panel */}
-          <Card className="max-w-2xl mx-auto">
-            <CardContent className="p-6">
-              <div className="space-y-4">
-                <div className="flex flex-wrap gap-4 justify-center">
-                  <Button
-                    onClick={() => handlePlayStateChange(!isPlaying)}
-                    size="lg"
-                    className="bg-blue-600 hover:bg-blue-700"
-                  >
-                    {isPlaying ? 'Pause' : 'Play'} Animation
-                  </Button>
-                  <Button
-                    onClick={resetAnimation}
-                    variant="outline"
-                    size="lg"
-                  >
-                    Reset to 2020
-                  </Button>
-                </div>
-                
-                <div className="text-center text-sm text-slate-600">
-                  <p>
-                    <strong>Current:</strong> {data.years[currentTimeIndex]} | 
-                    <strong> Sea Level:</strong> {currentScenarioData[currentTimeIndex]?.toFixed(3)}m | 
-                    <strong> Scenario:</strong> {selectedScenario}°C warming
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          {/* Simple Controls */}
+          <div className="flex justify-center gap-4">
+            <Button
+              onClick={() => handlePlayStateChange(!isPlaying)}
+              size="lg"
+              className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-full font-medium"
+            >
+              {isPlaying ? 'Pause' : 'Play'}
+            </Button>
+            <Button
+              onClick={resetAnimation}
+              variant="outline"
+              size="lg"
+              className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 py-3 rounded-full font-medium"
+            >
+              Reset
+            </Button>
+          </div>
 
-          {/* Information Panel */}
-          <Card className="max-w-4xl mx-auto">
-            <CardContent className="p-6">
-              <h3 className="text-xl font-semibold mb-4 text-slate-700">
-                Understanding the Scenarios
-              </h3>
-              <div className="grid md:grid-cols-3 gap-6 text-sm">
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-green-700">1.5°C Scenario</h4>
-                  <p className="text-slate-600">
-                    Paris Agreement target. Requires immediate and drastic emission reductions.
-                    Represents the best-case scenario with minimal sea level rise.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-orange-700">2.5°C Scenario</h4>
-                  <p className="text-slate-600">
-                    Current trajectory based on national commitments.
-                    Moderate warming with significant coastal impacts.
-                  </p>
-                </div>
-                <div className="space-y-2">
-                  <h4 className="font-semibold text-red-700">5°C Scenario</h4>
-                  <p className="text-slate-600">
-                    High emissions pathway. Represents worst-case scenario with
-                    catastrophic sea level rise and widespread displacement.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Footer Info */}
-          <div className="text-center text-sm text-slate-500 py-8">
+          {/* Status */}
+          <div className="text-center text-sm text-slate-500 space-y-1">
             <p>
-              📊 <strong>Data Extensibility:</strong> Replace /public/data/fiji-sealevel-data.json 
-              and /public/sounds/ files to visualize other Pacific nations.
-            </p>
-            <p className="mt-2">
-              🎵 <strong>Audio:</strong> Place corresponding .mp3 files in /public/sounds/ directory 
-              for full audio experience.
+              <span className="font-medium">{data.years[currentTimeIndex]}</span> — 
+              <span className="font-medium"> {currentScenarioData[currentTimeIndex]?.toFixed(2)}m</span> rise
             </p>
           </div>
         </div>
