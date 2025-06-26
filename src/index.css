@@ -1,9 +1,9 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. */
-
+/* GitHub Dark Mode Design System */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -37,67 +37,63 @@
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* GitHub Dark Mode Custom Properties */
+    --github-bg: #0d1117;
+    --github-bg-secondary: #161b22;
+    --github-card: #21262d;
+    --github-card-hover: #30363d;
+    --github-border: #30363d;
+    --github-text-primary: #f0f6fc;
+    --github-text-secondary: #8b949e;
+    --github-text-muted: #6e7681;
+    --github-accent: #238636;
+    --github-accent-secondary: #2ea043;
+    --github-blue: #58a6ff;
+    --github-hover: rgba(240,246,252,0.04);
   }
 
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+  body {
+    background-color: var(--github-bg);
+    color: var(--github-text-primary);
   }
+}
+
+/* GitHub Dark Mode Tailwind Classes */
+@layer utilities {
+  .bg-github-bg { background-color: var(--github-bg); }
+  .bg-github-bg-secondary { background-color: var(--github-bg-secondary); }
+  .bg-github-card { background-color: var(--github-card); }
+  .bg-github-card-hover { background-color: var(--github-card-hover); }
+  .bg-github-hover { background-color: var(--github-hover); }
+  .border-github-border { border-color: var(--github-border); }
+  .text-github-text-primary { color: var(--github-text-primary); }
+  .text-github-text-secondary { color: var(--github-text-secondary); }
+  .text-github-text-muted { color: var(--github-text-muted); }
+  .text-github-accent { color: var(--github-accent); }
+  .text-github-blue { color: var(--github-blue); }
+  .bg-github-accent { background-color: var(--github-accent); }
+  .bg-github-blue { background-color: var(--github-blue); }
+}
+
+/* Scrollbar styling for GitHub aesthetic */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 @layer base {
   * {
     @apply border-border;
-  }
-
-  body {
-    @apply bg-background text-foreground;
   }
 }

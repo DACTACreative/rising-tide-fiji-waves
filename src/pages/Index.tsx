@@ -101,10 +101,10 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-bg">
+      <div className="min-h-screen flex items-center justify-center bg-github-bg">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-dark-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-dark-text-secondary font-medium">Loading...</p>
+          <div className="w-8 h-8 border-2 border-github-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-github-text-secondary font-medium">Loading...</p>
         </div>
       </div>
     );
@@ -112,13 +112,13 @@ const Index = () => {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-dark-bg">
-        <Card className="max-w-md bg-dark-card border-dark-border">
+      <div className="min-h-screen flex items-center justify-center bg-github-bg">
+        <Card className="max-w-md bg-github-card border-github-border">
           <CardContent className="p-8 text-center space-y-4">
             <div className="text-red-400 text-2xl">⚠️</div>
             <h2 className="text-lg font-semibold text-red-400">Error</h2>
             <p className="text-red-300 text-sm">{error || 'Unknown error'}</p>
-            <Button onClick={() => window.location.reload()} variant="outline" size="sm" className="border-dark-border text-dark-text-primary hover:bg-dark-hover">
+            <Button onClick={() => window.location.reload()} variant="outline" size="sm" className="border-github-border text-github-text-primary hover:bg-github-hover">
               Retry
             </Button>
           </CardContent>
@@ -135,7 +135,7 @@ const Index = () => {
   const currentSeaLevel = currentScenarioData[currentTimeIndex] || 0;
 
   return (
-    <div className="min-h-screen bg-dark-bg text-dark-text-primary">
+    <div className="min-h-screen bg-github-bg text-github-text-primary">
       {/* Temperature Countdown - Fixed position */}
       <TemperatureCountdown 
         temperature={parseFloat(selectedScenario)}
@@ -147,10 +147,10 @@ const Index = () => {
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-16 space-y-4">
-          <h1 className="text-3xl md:text-4xl font-light text-dark-text-primary tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-light text-github-text-primary tracking-tight">
             Fiji Sea Level Rise
           </h1>
-          <p className="text-dark-text-secondary max-w-lg mx-auto leading-relaxed">
+          <p className="text-github-text-secondary max-w-lg mx-auto leading-relaxed">
             Visualizing climate impact through three warming scenarios
           </p>
         </div>
@@ -202,7 +202,7 @@ const Index = () => {
             <Button
               onClick={() => handlePlayStateChange(!isPlaying)}
               size="lg"
-              className="bg-dark-accent hover:bg-dark-accent/80 text-white px-8 py-3 rounded-full font-medium"
+              className="bg-github-accent hover:bg-github-accent-secondary text-white px-8 py-3 rounded-full font-medium"
             >
               {isPlaying ? 'Pause' : 'Play'}
             </Button>
@@ -210,14 +210,14 @@ const Index = () => {
               onClick={resetAnimation}
               variant="outline"
               size="lg"
-              className="border-dark-border text-dark-text-primary hover:bg-dark-hover px-8 py-3 rounded-full font-medium"
+              className="border-github-border text-github-text-primary hover:bg-github-hover px-8 py-3 rounded-full font-medium"
             >
               Reset
             </Button>
           </div>
 
           {/* Status */}
-          <div className="text-center text-sm text-dark-text-secondary space-y-1">
+          <div className="text-center text-sm text-github-text-secondary space-y-1">
             <p>
               <span className="font-medium">{data.years[currentTimeIndex]}</span> — 
               <span className="font-medium"> {currentSeaLevel.toFixed(2)}m</span> rise
