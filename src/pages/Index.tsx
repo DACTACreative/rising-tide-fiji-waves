@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { WaveVisualizer } from '@/components/WaveVisualizer';
 import { ScenarioSelector } from '@/components/ScenarioSelector';
 import { AudioPlayer } from '@/components/AudioPlayer';
+import { TemperatureCountdown } from '@/components/TemperatureCountdown';
+import { ScrollTimeline } from '@/components/ScrollTimeline';
 import { DataLoader, SeaLevelData } from '@/utils/DataLoader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -55,6 +57,20 @@ const Index = () => {
     return () => clearInterval(interval);
   }, [isPlaying, data, animationSpeed]);
 
+  // Scroll-based timeline control
+  useEffect(() => {
+    const handleScroll = () => {
+      if (!data || isPlaying) return;
+      
+      const scrollPercent = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight);
+      const newIndex = Math.floor(scrollPercent * (data.years.length - 1));
+      setCurrentTimeIndex(Math.max(0, Math.min(newIndex, data.years.length - 1)));
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [data, isPlaying]);
+
   const handleScenarioChange = (scenario: string) => {
     setSelectedScenario(scenario);
     setCurrentTimeIndex(0);
@@ -74,6 +90,10 @@ const Index = () => {
     setCurrentTimeIndex(Math.max(0, Math.min(newIndex, data.years.length - 1)));
   };
 
+  const handleTimelineChange = (index: number) => {
+    setCurrentTimeIndex(index);
+  };
+
   const resetAnimation = () => {
     setCurrentTimeIndex(0);
     setIsPlaying(false);
@@ -81,10 +101,10 @@ const Index = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-blue-50">
+      <div className="min-h-screen flex items-center justify-center bg-dark-bg">
         <div className="text-center space-y-4">
-          <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-          <p className="text-slate-600 font-medium">Loading...</p>
+          <div className="w-8 h-8 border-2 border-dark-accent border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="text-dark-text-secondary font-medium">Loading...</p>
         </div>
       </div>
     );
@@ -92,13 +112,13 @@ const Index = () => {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-red-50">
-        <Card className="max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-dark-bg">
+        <Card className="max-w-md bg-dark-card border-dark-border">
           <CardContent className="p-8 text-center space-y-4">
-            <div className="text-red-500 text-2xl">⚠️</div>
-            <h2 className="text-lg font-semibold text-red-700">Error</h2>
-            <p className="text-red-600 text-sm">{error || 'Unknown error'}</p>
-            <Button onClick={() => window.location.reload()} variant="outline" size="sm">
+            <div className="text-red-400 text-2xl">⚠️</div>
+            <h2 className="text-lg font-semibold text-red-400">Error</h2>
+            <p className="text-red-300 text-sm">{error || 'Unknown error'}</p>
+            <Button onClick={() => window.location.reload()} variant="outline" size="sm" className="border-dark-border text-dark-text-primary hover:bg-dark-hover">
               Retry
             </Button>
           </CardContent>
@@ -112,16 +132,25 @@ const Index = () => {
   const duration = data.years.length;
   const currentTime = currentTimeIndex + 1;
   const audioUrl = data.audio[selectedScenario];
+  const currentSeaLevel = currentScenarioData[currentTimeIndex] || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50">
+    <div className="min-h-screen bg-dark-bg text-dark-text-primary">
+      {/* Temperature Countdown - Fixed position */}
+      <TemperatureCountdown 
+        temperature={parseFloat(selectedScenario)}
+        seaLevel={currentSeaLevel}
+        year={data.years[currentTimeIndex]}
+        isVisible={true}
+      />
+
       <div className="container mx-auto px-6 py-12 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-16 space-y-4">
-          <h1 className="text-3xl md:text-4xl font-light text-slate-800 tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-light text-dark-text-primary tracking-tight">
             Fiji Sea Level Rise
           </h1>
-          <p className="text-slate-600 max-w-lg mx-auto leading-relaxed">
+          <p className="text-dark-text-secondary max-w-lg mx-auto leading-relaxed">
             Visualizing climate impact through three warming scenarios
           </p>
         </div>
@@ -149,6 +178,14 @@ const Index = () => {
             onProgress={(progress) => console.log('Wave progress:', progress)}
           />
 
+          {/* Scroll Timeline */}
+          <ScrollTimeline 
+            years={data.years}
+            currentIndex={currentTimeIndex}
+            onTimelineChange={handleTimelineChange}
+            disabled={isPlaying}
+          />
+
           {/* Audio Player */}
           <AudioPlayer
             audioUrl={audioUrl}
@@ -165,7 +202,7 @@ const Index = () => {
             <Button
               onClick={() => handlePlayStateChange(!isPlaying)}
               size="lg"
-              className="bg-slate-800 hover:bg-slate-700 text-white px-8 py-3 rounded-full font-medium"
+              className="bg-dark-accent hover:bg-dark-accent/80 text-white px-8 py-3 rounded-full font-medium"
             >
               {isPlaying ? 'Pause' : 'Play'}
             </Button>
@@ -173,20 +210,23 @@ const Index = () => {
               onClick={resetAnimation}
               variant="outline"
               size="lg"
-              className="border-slate-300 text-slate-700 hover:bg-slate-50 px-8 py-3 rounded-full font-medium"
+              className="border-dark-border text-dark-text-primary hover:bg-dark-hover px-8 py-3 rounded-full font-medium"
             >
               Reset
             </Button>
           </div>
 
           {/* Status */}
-          <div className="text-center text-sm text-slate-500 space-y-1">
+          <div className="text-center text-sm text-dark-text-secondary space-y-1">
             <p>
               <span className="font-medium">{data.years[currentTimeIndex]}</span> — 
-              <span className="font-medium"> {currentScenarioData[currentTimeIndex]?.toFixed(2)}m</span> rise
+              <span className="font-medium"> {currentSeaLevel.toFixed(2)}m</span> rise
             </p>
           </div>
         </div>
+
+        {/* Extra space for scroll interaction */}
+        <div className="h-screen"></div>
       </div>
     </div>
   );

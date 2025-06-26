@@ -29,6 +29,8 @@ export const AudioPlayer = ({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [volume, setVolume] = useState([70]);
+  const [actualDuration, setActualDuration] = useState(0);
+  const [actualCurrentTime, setActualCurrentTime] = useState(0);
 
   // Initialize Tone.js audio context
   useEffect(() => {
@@ -40,7 +42,7 @@ export const AudioPlayer = ({
     initAudio();
   }, []);
 
-  // Load audio file when URL changes
+  // Load actual audio file
   useEffect(() => {
     if (!audioUrl) return;
 
@@ -54,27 +56,22 @@ export const AudioPlayer = ({
           playerRef.current.dispose();
         }
 
-        // Create new player - for demo purposes, we'll create a synthetic tone
-        // In production, replace this with actual audio file loading
-        const synth = new Tone.Synth().toDestination();
-        
-        // Create a simple melody based on scenario
-        const getScenarioFrequencies = (scenario: string) => {
-          switch (scenario) {
-            case '1.5': return ['C4', 'D4', 'E4', 'F4'];
-            case '2.5': return ['A3', 'B3', 'C4', 'D4', 'E4'];
-            case '5': return ['F3', 'G3', 'A3', 'B3', 'C4', 'D4'];
-            default: return ['C4'];
+        // Create new player with actual audio file
+        const player = new Tone.Player({
+          url: audioUrl,
+          onload: () => {
+            setActualDuration(player.buffer.duration);
+            setIsLoading(false);
+          },
+          onerror: (error) => {
+            setError('Failed to load audio file');
+            setIsLoading(false);
+            console.error('Audio loading error:', error);
           }
-        };
+        }).toDestination();
 
-        const frequencies = getScenarioFrequencies(scenario);
-        let noteIndex = 0;
+        playerRef.current = player;
 
-        // Store synth reference for cleanup
-        playerRef.current = synth as any;
-
-        setIsLoading(false);
       } catch (err) {
         setError('Failed to load audio');
         setIsLoading(false);
@@ -90,13 +87,44 @@ export const AudioPlayer = ({
         playerRef.current = null;
       }
     };
-  }, [audioUrl, scenario]);
+  }, [audioUrl]);
+
+  // Handle play/pause
+  useEffect(() => {
+    if (!playerRef.current) return;
+
+    if (isPlaying) {
+      playerRef.current.start();
+    } else {
+      playerRef.current.stop();
+    }
+  }, [isPlaying]);
 
   // Handle volume changes
   useEffect(() => {
-    const volumeDb = (volume[0] / 100) * 40 - 40; // Convert 0-100 to -40db to 0db
+    const volumeDb = (volume[0] / 100) * 40 - 40;
     Tone.Destination.volume.value = volumeDb;
   }, [volume]);
+
+  // Track playback progress
+  useEffect(() => {
+    if (!isPlaying || !playerRef.current) return;
+
+    const interval = setInterval(() => {
+      // This is a simplified progress tracking - Tone.js doesn't have built-in progress
+      // In a real implementation, you'd need more sophisticated timing
+      setActualCurrentTime(prev => {
+        const newTime = prev + 0.1;
+        if (newTime >= actualDuration) {
+          onPlayStateChange(false);
+          return 0;
+        }
+        return newTime;
+      });
+    }, 100);
+
+    return () => clearInterval(interval);
+  }, [isPlaying, actualDuration, onPlayStateChange]);
 
   const handlePlay = async () => {
     try {
@@ -116,11 +144,14 @@ export const AudioPlayer = ({
 
   const handleStop = () => {
     onPlayStateChange(false);
+    setActualCurrentTime(0);
     onSeek(0);
   };
 
   const handleSeek = (value: number[]) => {
-    onSeek((value[0] / 100) * duration);
+    const newTime = (value[0] / 100) * actualDuration;
+    setActualCurrentTime(newTime);
+    onSeek((newTime / actualDuration) * duration);
   };
 
   const formatTime = (seconds: number) => {
@@ -129,25 +160,25 @@ export const AudioPlayer = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const progress = actualDuration > 0 ? (actualCurrentTime / actualDuration) * 100 : 0;
 
   return (
-    <Card className="w-full max-w-2xl mx-auto">
+    <Card className="w-full max-w-2xl mx-auto bg-dark-card border-dark-border">
       <CardContent className="p-6">
         <div className="space-y-4">
           {/* Audio Title */}
           <div className="text-center">
-            <h3 className="text-lg font-semibold text-slate-700">
+            <h3 className="text-lg font-semibold text-dark-text-primary">
               Climate Audio Narrative
             </h3>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-dark-text-secondary">
               {scenario}°C warming scenario for Fiji
             </p>
           </div>
 
           {/* Error Display */}
           {error && (
-            <div className="text-red-500 text-sm text-center bg-red-50 p-2 rounded">
+            <div className="text-red-400 text-sm text-center bg-red-950/20 p-2 rounded border border-red-800/30">
               {error}
             </div>
           )}
@@ -160,11 +191,11 @@ export const AudioPlayer = ({
               max={100}
               step={1}
               className="w-full"
-              disabled={isLoading || duration === 0}
+              disabled={isLoading || actualDuration === 0}
             />
-            <div className="flex justify-between text-xs text-slate-500">
-              <span>{formatTime(currentTime)}</span>
-              <span>{formatTime(duration)}</span>
+            <div className="flex justify-between text-xs text-dark-text-secondary">
+              <span>{formatTime(actualCurrentTime)}</span>
+              <span>{formatTime(actualDuration)}</span>
             </div>
           </div>
 
@@ -174,7 +205,7 @@ export const AudioPlayer = ({
               onClick={isPlaying ? handlePause : handlePlay}
               disabled={isLoading}
               size="lg"
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-dark-accent hover:bg-dark-accent/80 text-white"
             >
               {isLoading ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -187,9 +218,10 @@ export const AudioPlayer = ({
             
             <Button
               onClick={handleStop}
-              disabled={isLoading || (!isPlaying && currentTime === 0)}
+              disabled={isLoading || (!isPlaying && actualCurrentTime === 0)}
               variant="outline"
               size="lg"
+              className="border-dark-border text-dark-text-primary hover:bg-dark-hover"
             >
               <Square className="w-4 h-4" />
             </Button>
@@ -197,7 +229,7 @@ export const AudioPlayer = ({
 
           {/* Volume Control */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-600">Volume</label>
+            <label className="text-sm font-medium text-dark-text-primary">Volume</label>
             <Slider
               value={volume}
               onValueChange={setVolume}
@@ -205,11 +237,6 @@ export const AudioPlayer = ({
               step={1}
               className="w-full"
             />
-          </div>
-
-          {/* Audio Info */}
-          <div className="text-xs text-slate-400 text-center">
-            * Audio files should be placed in the public/sounds/ directory
           </div>
         </div>
       </CardContent>
