@@ -1,0 +1,16 @@
+
+{
+  "country": "Solomon Islands",
+  "city": "Honiara",
+  "years": [2020, 2025, 2030, 2035, 2040, 2045, 2050],
+  "scenarios": {
+    "1.5": [0.02, 0.05, 0.08, 0.12, 0.16, 0.20, 0.25],
+    "2.5": [0.02, 0.08, 0.15, 0.25, 0.35, 0.48, 0.62],
+    "5": [0.02, 0.12, 0.28, 0.48, 0.75, 1.10, 1.55]
+  },
+  "audio": {
+    "1.5": "/sounds/solomon-islands/scenario_1_5.wav",
+    "2.5": "/sounds/solomon-islands/scenario_2_5.wav", 
+    "5": "/sounds/solomon-islands/scenario_5.wav"
+  }
+}
